@@ -32,54 +32,39 @@ return response()->json([
     public function job_post_store(Request $request)
     {
         try{
-        $request->validate([
-            'job_title' => 'required|max:255',
-            'descript' => 'required|max:255',
-            'userid' => 'required',
-            'status' => 'required',
-            'thumbnail' => 'required',
-            
-        ]);
-        $fileName='';
-        print("1");
-        if($request->hasFile('thumbnail'))
-        {
-           $file=$request->file('thumbnail');
-           $fileName=date('Ymdms').'.'.$file->getClientOriginalExtension();
-           $file->storeAs('/uploads',$fileName);
-           print("2");
-
-        }
-        print("3");
-        $job_posts=JobPost::create([
+            $fileName='';
+            if($request->hasFile('image'))
+            {
+               $file=$request->file('image');
+               $fileName=date('Ymdms').'.'.$file->getClientOriginalExtension();
+               $file->storeAs('/uploads',$fileName);
+    
+            }
+            $job_posts=JobPost::create([
             'title'=>$request->job_title,
-            'description'=>$request->descript,
+            'description'=>$request->description,
             'user_id'=>$request->userid,
+            'thumbnail'=>$fileName,
             'status'=>$request->status,
-           'thumbnail'=>$fileName,
+           
            ]);
-           print("4");
-           if($job_posts)
+           
+           
+    return response()->json([
+        'success'=>'true',
+        'message'=>'Job Post Created Succeessfully',
+        'data'=>$job_posts,
+    ]); 
+            }
+            catch (\Throwable $s)
         {
             return response()->json([
-                'success'=>'true',
-                'message'=>'Job Post Added Succeessfully',
-                'data'=>$job_posts,
-            ],200);
-           
+                'success'=>'false',
+                'message'=>$s->getMessage(),
+                'data'=>'',
+            ]); 
         }
-        else{
-            return response()->json(["result"=>"Data is not found"],404);
-        }
-    }
-    catch (\Throwable $s)
-    {
-        return response()->json([
-            'success'=>'false',
-            'message'=>$s->getMessage(),
-            'data'=>'',
-        ]); 
-    }
+    
 }
 
 public function showpost(Request $request,$id)
